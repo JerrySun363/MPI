@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
 
 import mpi.*;
@@ -40,7 +39,12 @@ public class MPIPointCluster {
 		MPIPointCluster cluster = new MPIPointCluster(Integer.parseInt(args[1]));
 		cluster.readData(args[0]);
 		cluster.initSeed();
-
+		//start to calculate time data
+		cluster.init();
+		cluster.iteration();
+		//time ends here.
+		MPI.Finalize();
+		cluster.printCluster();
 	}
 
 	public MPIPointCluster(int k) {
@@ -97,7 +101,6 @@ public class MPIPointCluster {
 		Arrays.fill(clusters, -1);
 
 		this.capacity = new int[this.procs];
-
 		for (int i = 1; i < this.procs; i++) {
 			this.capacity[i] = xPoint.length / (this.procs - 1)
 					+ (i <= xPoint.length % (this.procs - 1) ? 1 : 0);
