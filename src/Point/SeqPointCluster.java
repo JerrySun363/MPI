@@ -17,6 +17,7 @@ public class SeqPointCluster {
 	protected ArrayList<Point> seeds;
 	protected int clusterNumber;
 	protected ArrayList<HashSet<Point>> clusters;
+    public String outputFile;
 
 	public void readData(String filename) {
 		try {
@@ -60,14 +61,15 @@ public class SeqPointCluster {
 	}
 
 	public static void main(String args[]) {
-		if (args.length != 2) {
+		if (args.length != 3) {
 			System.out
-					.println("Usage: Java SeqPointCluster <DataFileName> <ClusterNumber>");
+					.println("Usage: Java SeqPointCluster <InputFileName> <ClusterNumber> <OutputFileName>");
 		}
 
 		SeqPointCluster spc = new SeqPointCluster(Integer.parseInt(args[1]));
 		spc.readData(args[0]);
 		spc.initSeed();
+        spc.outputFile = args[2];
 		long start = System.currentTimeMillis();
 		spc.iteration();
 		long time = System.currentTimeMillis() - start;
@@ -138,7 +140,7 @@ public class SeqPointCluster {
 	public void printCluster() {
 		try {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File("output.csv"))));
+					new FileOutputStream(new File(outputFile))));
 			for (int i = 0; i < this.clusters.size(); i++) {
 				HashSet<Point> points = clusters.get(i);
 				for (Point p : points) {

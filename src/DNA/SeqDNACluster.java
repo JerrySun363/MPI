@@ -42,6 +42,7 @@ public class SeqDNACluster {
 	protected ArrayList<String> seeds;
 	protected int clusterNumber;
 	protected ArrayList<HashSet<String>> clusters;
+    public String output;
 
 	public void readData(String filename) {
 		try {
@@ -95,14 +96,15 @@ public class SeqDNACluster {
 	}
 
 	public static void main(String args[]) {
-		if (args.length != 2) {
+		if (args.length != 3) {
 			System.out
-					.println("Usage: Java SeqDNACluster <DataFileName> <ClusterNumber>");
+					.println("Usage: Java SeqDNACluster <Input> <ClusterNumber> <Output>");
 		}
 
 		SeqDNACluster spc = new SeqDNACluster(Integer.parseInt(args[1]));
 		spc.readData(args[0]);
 		spc.initSeed();
+        spc.output = args[2];
 		long start = System.currentTimeMillis();
 		spc.iteration();
 		long time = System.currentTimeMillis() - start;
@@ -191,7 +193,7 @@ public class SeqDNACluster {
 	public void printCluster() {
 		try {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File("output.csv"))));
+					new FileOutputStream(new File(this.output))));
 			for (int i = 0; i < this.clusters.size(); i++) {
 				HashSet<String> dnaStrands = clusters.get(i);
 				for (String p : dnaStrands) {

@@ -33,7 +33,7 @@ public class MPIPointCluster {
 	public static void main(String args[]) throws MPIException {
 		if (args.length != 3) {
 			System.out
-					.println("Usage: MPIPointCluster <DataFileName> <ClusterNumber> <PointNumber>");
+					.println("Usage: MPIPointCluster <Input> <K> <PointNumber>");
 			System.exit(-1);
 		}
 
