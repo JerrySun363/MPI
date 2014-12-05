@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-import Point.Point;
-
 public class SeqDNACluster {
 	
 	class PopularBase implements Comparator<PopularBase>{
