@@ -71,7 +71,7 @@ public class SeqDNACluster {
 		}
 	}
 
-	protected double distance(String DNAStrand1, String DNAStrand2) {
+	protected int distance(String DNAStrand1, String DNAStrand2) {
 		int len = DNAStrand1.length();
         int record[][] = new int[len+1][len+1];
         //initial state
@@ -99,7 +99,7 @@ public class SeqDNACluster {
 	public static void main(String args[]) {
 		if (args.length != 2) {
 			System.out
-					.println("Usage: Java SeqPointCluster <DataFileName> <ClusterNumber>");
+					.println("Usage: Java SeqDNACluster <DataFileName> <ClusterNumber>");
 		}
 
 		SeqDNACluster spc = new SeqDNACluster(Integer.parseInt(args[1]));
