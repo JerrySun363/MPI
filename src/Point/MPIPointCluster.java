@@ -110,6 +110,7 @@ public class MPIPointCluster {
 		if (rank == 0) {// master
 			int offset = 0;
 			for (int i = 1; i < this.procs; i++) {
+				
 				MPI.COMM_WORLD.Send(xPoint, offset, this.capacity[i],
 						MPI.DOUBLE, i, i);
 				MPI.COMM_WORLD.Send(yPoint, offset, this.capacity[i],

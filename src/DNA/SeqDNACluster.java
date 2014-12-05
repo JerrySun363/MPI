@@ -197,8 +197,9 @@ public class SeqDNACluster {
 			for (int i = 0; i < this.clusters.size(); i++) {
 				HashSet<String> dnaStrands = clusters.get(i);
 				for (String p : dnaStrands) {
-					bw.write(p + "\n");
+					bw.write(p + " ");
 				}
+				bw.write("\n");
 			}
 			bw.close();
 		} catch (FileNotFoundException e) {
