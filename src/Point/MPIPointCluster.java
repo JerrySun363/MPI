@@ -131,21 +131,22 @@ public class MPIPointCluster {
 	public void iteration() throws MPIException{
 		boolean[] changed = new boolean[1];
 		changed[0] = true;
-
+		int count = 0;
 		while (changed[0]) {
+			System.out.println("Iteration #"+count);
+			count++;
 			MPI.COMM_WORLD.Bcast(seedX, 0, this.clusterNumber, MPI.DOUBLE, 0);
 			MPI.COMM_WORLD.Bcast(seedY, 0, this.clusterNumber, MPI.DOUBLE, 0);
 
 			for (int i = 0; i < this.capacity[rank]; i++) {
 				double dis = Double.MAX_VALUE;
-				int cluster = -1;
-
+				
 				for (int j = 0; j < seedX.length; j++) {
 					double mydis = distance(xPoint[i], yPoint[i], seedX[i],
 							seedY[i]);
 					if (mydis < dis) {
-						dis = mydis;
-						this.clusters[i] = cluster;
+						dis = mydis; 
+						this.clusters[i] = j;
 					}
 				}
 			}
