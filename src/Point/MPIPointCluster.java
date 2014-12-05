@@ -29,12 +29,13 @@ public class MPIPointCluster {
 	private double[] seedY;
 	private int clusterNumber;
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws MPIException{
 		if (args.length != 2) {
 			System.out
 					.println("Usage: MPIPointCluster <DataFileName> <ClusterNumber>");
 			System.exit(-1);
 		}
+		
 		MPI.Init(args);
 		MPIPointCluster cluster = new MPIPointCluster(Integer.parseInt(args[1]));
 		cluster.readData(args[0]);
@@ -47,7 +48,7 @@ public class MPIPointCluster {
 		cluster.printCluster();
 	}
 
-	public MPIPointCluster(int k) {
+	public MPIPointCluster(int k) throws MPIException {
 		this.rank = MPI.COMM_WORLD.Rank();
 		this.procs = MPI.COMM_WORLD.Size();
 
@@ -96,7 +97,7 @@ public class MPIPointCluster {
 	/**
 	 * Send data to each process
 	 */
-	public void init() {
+	public void init() throws MPIException{
 		this.clusters = new int[xPoint.length];
 		Arrays.fill(clusters, -1);
 
@@ -127,7 +128,7 @@ public class MPIPointCluster {
 		}
 	}
 
-	public void iteration() {
+	public void iteration() throws MPIException{
 		boolean[] changed = new boolean[1];
 		changed[0] = true;
 
@@ -211,7 +212,7 @@ public class MPIPointCluster {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(new File("mpioutput.csv"))));
 			for (int i = 0; i < xPoint.length; i++) {
-				bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i]);
+				bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i]+"\n");
 			}
 			bw.close();
 		} catch (FileNotFoundException e) {
