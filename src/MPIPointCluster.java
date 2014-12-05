@@ -227,19 +227,22 @@ public class MPIPointCluster {
 	}
 
 	public void printCluster() {
-		try {
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File("mpioutput.csv"))));
-			for (int i = 0; i < xPoint.length; i++) {
-				bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i] + "\n");
+		if (this.rank == 0) {
+			try {
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+						new FileOutputStream(new File("mpioutput.csv"))));
+				for (int i = 0; i < xPoint.length; i++) {
+					bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i]
+							+ "\n");
+				}
+				bw.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				System.err.println("I/O Exception!");
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.err.println("I/O Exception!");
 			}
-			bw.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.err.println("I/O Exception!");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("I/O Exception!");
 		}
 	}
 
