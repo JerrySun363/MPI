@@ -27,23 +27,23 @@ public class MPIPointCluster {
 	private double[] seedY;
 	private int clusterNumber;
 
-	public static void main(String args[]) throws MPIException{
+	public static void main(String args[]) throws MPIException {
 		if (args.length != 2) {
 			System.out
 					.println("Usage: MPIPointCluster <DataFileName> <ClusterNumber>");
 			System.exit(-1);
 		}
-		
+
 		MPI.Init(args);
 		MPIPointCluster cluster = new MPIPointCluster(Integer.parseInt(args[1]));
 		cluster.readData(args[0]);
 		cluster.initSeed();
-		//start to calculate time data
+		// start to calculate time data
 		long start = System.currentTimeMillis();
 		cluster.init();
 		cluster.iteration();
-		//time ends here.
-		System.out.println();
+		// time ends here.
+		System.out.println(System.currentTimeMillis() - start);
 		MPI.Finalize();
 		cluster.printCluster();
 	}
@@ -98,7 +98,7 @@ public class MPIPointCluster {
 	/**
 	 * Send data to each process
 	 */
-	public void init() throws MPIException{
+	public void init() throws MPIException {
 		this.clusters = new int[xPoint.length];
 		Arrays.fill(clusters, -1);
 
@@ -118,7 +118,8 @@ public class MPIPointCluster {
 				MPI.COMM_WORLD.Send(clusters, offset, this.capacity[i],
 						MPI.INT, i, i);
 				offset += this.capacity[i];
-				//System.out.println("Data I am sending:" + Arrays.toString(xPoint));
+				// System.out.println("Data I am sending:" +
+				// Arrays.toString(xPoint));
 			}
 		} else {
 			MPI.COMM_WORLD.Recv(xPoint, 0, this.capacity[rank], MPI.DOUBLE, 0,
@@ -127,52 +128,54 @@ public class MPIPointCluster {
 					rank);
 			MPI.COMM_WORLD.Recv(clusters, 0, this.capacity[rank], MPI.INT, 0,
 					rank);
-			//System.out.println("I am rank " + rank + "data I got: "+ Arrays.toString(xPoint));
+			// System.out.println("I am rank " + rank + "data I got: "+
+			// Arrays.toString(xPoint));
 		}
 	}
 
-	public void iteration() throws MPIException{
+	public void iteration() throws MPIException {
 		boolean[] changed = new boolean[1];
 		changed[0] = true;
-		//int count = 0;
+		// int count = 0;
 		while (changed[0]) {
-			//System.out.println("Iteration #"+count + " rank #"+this.rank);
-			//count++;
+			// System.out.println("Iteration #"+count + " rank #"+this.rank);
+			// count++;
 			MPI.COMM_WORLD.Bcast(seedX, 0, this.clusterNumber, MPI.DOUBLE, 0);
 			MPI.COMM_WORLD.Bcast(seedY, 0, this.clusterNumber, MPI.DOUBLE, 0);
-			//System.out.println("SeedX length " + seedX.length +" for rank "+ this.rank);
-			//System.out.println("SeedX: " + Arrays.toString(this.seedX));
-		
-			
+			// System.out.println("SeedX length " + seedX.length +" for rank "+
+			// this.rank);
+			// System.out.println("SeedX: " + Arrays.toString(this.seedX));
+
 			for (int i = 0; i < this.capacity[rank]; i++) {
 				double dis = Double.MAX_VALUE;
 				for (int j = 0; j < seedX.length; j++) {
 					double mydis = distance(xPoint[i], yPoint[i], seedX[j],
 							seedY[j]);
 					if (mydis < dis) {
-						dis = mydis; 
+						dis = mydis;
 						this.clusters[i] = j;
 					}
 				}
-				//System.out.println("The cluster it belongs to"+ this.clusters[i]);
+				// System.out.println("The cluster it belongs to"+
+				// this.clusters[i]);
 			}
 			// calculate distance
 			if (this.rank != 0) { // wait for all the participants to send
-				//System.out.println("Send back cluster!");
+				// System.out.println("Send back cluster!");
 				MPI.COMM_WORLD.Send(clusters, 0, this.capacity[rank], MPI.INT,
 						0, 0);
 			} else {
 				int[] newCluster = new int[this.clusters.length];
 				int offset = 0;
 				for (int i = 1; i < this.procs; i++) {
-					//System.out.println("Offset is " + offset);
+					// System.out.println("Offset is " + offset);
 					MPI.COMM_WORLD.Recv(newCluster, offset, this.capacity[i],
 							MPI.INT, i, 0);
 					offset += this.capacity[i];
 				}
-				//System.out.println(Arrays.toString(newCluster));
-				//System.out.println(Arrays.toString(this.clusters));
-				
+				// System.out.println(Arrays.toString(newCluster));
+				// System.out.println(Arrays.toString(this.clusters));
+
 				// compare the two
 				int i = 0;
 				for (i = 0; i < newCluster.length; i++) {
@@ -185,7 +188,7 @@ public class MPIPointCluster {
 						break;
 					}
 				}
-				////System.out.println("now status: "+changed[0]);
+				// //System.out.println("now status: "+changed[0]);
 
 			}
 			if (rank == 0) {
@@ -200,8 +203,9 @@ public class MPIPointCluster {
 	}
 
 	private void recalculateSeed() {
-		//System.out.println("Data To Calculate Now:"+ Arrays.toString(this.xPoint));
-		
+		// System.out.println("Data To Calculate Now:"+
+		// Arrays.toString(this.xPoint));
+
 		double[] seedX = new double[this.clusterNumber];
 		double[] seedY = new double[this.clusterNumber];
 		int[] count = new int[this.clusterNumber];
@@ -216,10 +220,10 @@ public class MPIPointCluster {
 			seedX[i] /= count[i];
 			seedY[i] /= count[i];
 		}
-		
+
 		this.seedX = seedX;
 		this.seedY = seedY;
-		//System.out.println("SeedX: " + Arrays.toString(this.seedX));
+		// System.out.println("SeedX: " + Arrays.toString(this.seedX));
 	}
 
 	public void printCluster() {
@@ -227,7 +231,7 @@ public class MPIPointCluster {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(new File("mpioutput.csv"))));
 			for (int i = 0; i < xPoint.length; i++) {
-				bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i]+"\n");
+				bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i] + "\n");
 			}
 			bw.close();
 		} catch (FileNotFoundException e) {
