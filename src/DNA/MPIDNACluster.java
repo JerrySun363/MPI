@@ -122,7 +122,7 @@ public class MPIDNACluster {
 		}
 		
 		try {
-			System.out.println(InetAddress.getLocalHost().getHostName());
+			System.out.println("Host: " + InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
