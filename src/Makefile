@@ -24,4 +24,4 @@ run_MPI_Point:
 	mpirun -np $(Procs) java Point/MPIPointCluster $(Input) $(K) $(PointNumber)
 
 run_MPI_DNA:
-	mpirun -np $(Procs) java DNA/MPIDNACluster $(Input) $(K) $(DNALength) $(DNANumber)
+	mpirun -np $(Procs) java DNA/MPIDNACluster $(Input) $(K) $(Length) $(Number)
