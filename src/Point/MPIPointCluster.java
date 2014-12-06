@@ -49,8 +49,8 @@ public class MPIPointCluster {
 		cluster.init();
 		cluster.iteration();
 		// time ends here.
-		System.out.println("Rank " + cluster.rank + ": "
-				+ (System.currentTimeMillis() - start));
+		System.out.println("Rank " + cluster.rank + ": It uses "
+				+ (System.currentTimeMillis() - start) + " milliseconds to finish");
 		MPI.Finalize();
 		cluster.printCluster();
 
@@ -111,7 +111,7 @@ public class MPIPointCluster {
 					+ (i <= xPoint.length % (this.procs - 1) ? 1 : 0);
 		}
 		try {
-			System.out.println(InetAddress.getLocalHost().getHostName());
+			System.out.println("Host: " + InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -144,7 +144,6 @@ public class MPIPointCluster {
 		changed[0] = true;
 		int count = 0;
 		while (changed[0]) {
-			System.out.println("Iteration #" + count + " rank #" + this.rank);
 			count++;
 			MPI.COMM_WORLD.Bcast(seedX, 0, this.clusterNumber, MPI.DOUBLE, 0);
 			MPI.COMM_WORLD.Bcast(seedY, 0, this.clusterNumber, MPI.DOUBLE, 0);
@@ -206,6 +205,7 @@ public class MPIPointCluster {
 			}
 
 		}
+		System.out.println("It runs " + count + "iterations on rank " + rank);
 	}
 
 	private void recalculateSeed() {
@@ -237,7 +237,7 @@ public class MPIPointCluster {
 				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
 						new FileOutputStream(new File("mpioutput.csv"))));
 				for (int i = 0; i < xPoint.length; i++) {
-					bw.write(xPoint[i] + "," + yPoint[i] + "," + clusters[i]
+					bw.write("Point: " + xPoint[i] + "," + yPoint[i] + " belongs to " + clusters[i] + " cluster"
 							+ "\n");
 				}
 				bw.close();

@@ -144,7 +144,7 @@ public class SeqPointCluster {
 			for (int i = 0; i < this.clusters.size(); i++) {
 				HashSet<Point> points = clusters.get(i);
 				for (Point p : points) {
-					bw.write(p.x + "," + p.y + "," + i + "\n");
+					bw.write("Point: " + p.x + "," + p.y + " belongs to " + i + " cluster" + "\n");
 				}
 			}
 			bw.close();

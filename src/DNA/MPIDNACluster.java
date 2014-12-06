@@ -58,7 +58,8 @@ public class MPIDNACluster {
 		cluster.init();
 		cluster.iteration();
 		// time ends here.
-		System.out.println((System.currentTimeMillis() - start) + " running on rank " + cluster.rank);
+		System.out.println("Rank " + cluster.rank + ": It uses "
+				+ (System.currentTimeMillis() - start) + " milliseconds to finish");
 		MPI.Finalize();
 		cluster.printCluster();
 	}
@@ -268,7 +269,7 @@ public class MPIDNACluster {
 				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
 						new FileOutputStream(new File("mpiDNAoutput.csv"))));
 				for (int i = 0; i < DNAStrands.length; i++) {
-					bw.write(new String(DNAStrands[i]) + " " + clusters[i]
+					bw.write(new String(DNAStrands[i]) + " belongs to " +  clusters[i] + " cluster"
 							+ "\n");
 				}
 				bw.close();
