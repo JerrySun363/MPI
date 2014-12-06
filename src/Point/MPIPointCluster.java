@@ -210,7 +210,7 @@ public class MPIPointCluster {
 			}
 
 		}
-		System.out.println("It runs " + count + "iterations on rank " + rank);
+		System.out.println("It runs " + count + " iterations on rank " + rank);
 	}
 
 	private void recalculateSeed() {
@@ -243,7 +243,7 @@ public class MPIPointCluster {
 						new FileOutputStream(new File(this.output))));
 				for (int i = 0; i < xPoint.length; i++) {
 					bw.write("Point: " + xPoint[i] + "," + yPoint[i]
-							+ " belongs to " + clusters[i] + " cluster" + "\n");
+							+ " belongs to " + " cluster " + clusters[i] + "\n");
 				}
 				bw.close();
 			} catch (FileNotFoundException e) {

@@ -274,7 +274,7 @@ public class MPIDNACluster {
 						new FileOutputStream(new File(this.output))));
 				for (int i = 0; i < DNAStrands.length; i++) {
 					bw.write(new String(DNAStrands[i]) + " belongs to "
-							+ clusters[i] + " cluster" + "\n");
+							+ " cluster " + clusters[i]  + "\n");
 				}
 				bw.close();
 			} catch (FileNotFoundException e) {
