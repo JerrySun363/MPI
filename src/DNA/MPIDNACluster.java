@@ -44,7 +44,7 @@ public class MPIDNACluster {
 	public static void main(String args[]) throws MPIException {
 		if (args.length != 5) {
 			System.out
-					.println("Usage: MPIDNACluster <DataFileName> <ClusterNumber> <DNALength> <DNANumber> <Output>");
+			.println("Usage: MPIDNACluster <DataFileName> <ClusterNumber> <DNALength> <DNANumber> <Output>");
 			System.exit(-1);
 		}
 
@@ -69,6 +69,13 @@ public class MPIDNACluster {
 		cluster.printCluster();
 	}
 
+	/**
+	 * Constructor
+	 * @param k
+	 * @param len
+	 * @param num
+	 * @throws MPIException
+	 */
 	public MPIDNACluster(int k, int len, int num) throws MPIException {
 		this.rank = MPI.COMM_WORLD.Rank();
 		this.procs = MPI.COMM_WORLD.Size();
@@ -80,6 +87,10 @@ public class MPIDNACluster {
 		this.seeds = new char[this.clusterNumber][this.DNALength];
 	}
 
+	/**
+	 * read data from file 
+	 * @param filename
+	 */
 	private void readData(String filename) {
 		ArrayList<String> dnaStrands = new ArrayList<String>();
 		try {
@@ -102,6 +113,9 @@ public class MPIDNACluster {
 		}
 	}
 
+	/**
+	 * initialize seeds randomly 
+	 */
 	private void initSeed() {
 
 		Random rand = new Random();
@@ -143,8 +157,6 @@ public class MPIDNACluster {
 						MPI.INT, i, i);
 
 				offset += this.capacity[i];
-				// System.out.println("Data I am sending:" +
-				// Arrays.toString(xPoint));
 			}
 		} else {
 			for (int i = 0; i < capacity[this.rank]; i++)
@@ -153,11 +165,13 @@ public class MPIDNACluster {
 
 			MPI.COMM_WORLD.Recv(clusters, 0, this.capacity[rank], MPI.INT, 0,
 					rank);
-			// System.out.println("I am rank " + rank + "data I got: "+
-			// Arrays.toString(xPoint));
 		}
 	}
 
+	/**
+	 * iterations for K-means until converge
+	 * @throws MPIException
+	 */
 	public void iteration() throws MPIException {
 		boolean[] changed = new boolean[1];
 		changed[0] = true;
@@ -168,8 +182,6 @@ public class MPIDNACluster {
 			for (int i = 0; i < this.clusterNumber; i++) {
 				MPI.COMM_WORLD.Bcast(seeds[i], 0, this.DNALength, MPI.CHAR, 0); // TODO
 			}
-
-			// System.out.println("SeedX: " + Arrays.toString(this.seeds));
 
 			// reassign the class
 			for (int i = 0; i < this.capacity[rank]; i++) {
@@ -182,8 +194,6 @@ public class MPIDNACluster {
 						this.clusters[i] = j;
 					}
 				}
-				// System.out.println("The cluster it belongs to"+
-				// this.clusters[i]);
 			}
 			// calculate distance
 			if (this.rank != 0) { // wait for all the participants to send
@@ -194,14 +204,10 @@ public class MPIDNACluster {
 				int[] newCluster = new int[this.clusters.length];
 				int offset = 0;
 				for (int i = 1; i < this.procs; i++) {
-					// System.out.println("Offset is " + offset);
 					MPI.COMM_WORLD.Recv(newCluster, offset, this.capacity[i],
 							MPI.INT, i, 0);
 					offset += this.capacity[i];
 				}
-				// System.out.println(Arrays.toString(newCluster));
-				// System.out.println(Arrays.toString(this.clusters));
-
 				// check whether the cluster is fixed
 				int i = 0;
 				for (i = 0; i < newCluster.length; i++) {
@@ -214,7 +220,6 @@ public class MPIDNACluster {
 						break;
 					}
 				}
-				// System.out.println("now status: "+changed[0]);
 
 			}
 			if (rank == 0) {
@@ -228,9 +233,10 @@ public class MPIDNACluster {
 		}
 	}
 
+	/**
+	 * update seeds after one iteration
+	 */
 	private void recalculateSeed() {
-		// System.out.println("Data To Calculate Now:"+
-		// Arrays.toString(this.seeds));
 
 		ArrayList<ArrayList<String>> clusterStrings = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < this.clusterNumber; i++) {
@@ -287,6 +293,14 @@ public class MPIDNACluster {
 		}
 	}
 
+	/**
+	 * calculate the edit distance between two DNA
+	 * by counting the minimum number of operations(Insertion, Deletion, Substitution) 
+	 * required to transform one string into the other. 
+	 * @param DNAStrand1
+	 * @param DNAStrand2
+	 * @return
+	 */
 	private int distance(char[] DNAStrand1, char[] DNAStrand2) {
 		int len = DNAStrand1.length;
 		int record[][] = new int[len + 1][len + 1];

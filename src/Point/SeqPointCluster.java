@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+import mpi.MPIException;
+
 public class SeqPointCluster {
 	private ArrayList<Point> points;
 	private ArrayList<Point> seeds;
@@ -19,6 +21,9 @@ public class SeqPointCluster {
 	private ArrayList<HashSet<Point>> clusters;
 	private String outputFile = "SeqPointCluster.csv";
 
+	/**
+	 * read data from file
+	 */
 	public void readData(String filename) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -39,6 +44,9 @@ public class SeqPointCluster {
 		}
 	}
 
+	/**
+	 * initialize seeds randomly 
+	 */
 	public void initSeed() {
 		Random rand = new Random();
 		for (int i = 0; i < this.clusterNumber; i++) {
@@ -48,11 +56,23 @@ public class SeqPointCluster {
 		}
 	}
 
+	/**
+	 * calculate the distance between two points 
+	 * @param x
+	 * @param y
+	 * @param xCenter
+	 * @param yCenter
+	 * @return
+	 */
 	private double distance(Point p1, Point p2) {
 		return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y)
 				* (p1.y - p2.y));
 	}
 
+	/**
+	 * Constructor 
+	 * @param k
+	 */
 	public SeqPointCluster(int k) {
 		this.points = new ArrayList<Point>();
 		this.clusterNumber = k;
@@ -78,6 +98,9 @@ public class SeqPointCluster {
 
 	}
 
+	/**
+	 * update seeds after one iteration
+	 */
 	private void recalculateSeed() {
 		for (int i = 0; i < this.clusters.size(); i++) {
 			double x = 0, y = 0;
@@ -90,6 +113,10 @@ public class SeqPointCluster {
 		}
 	}
 
+	/**
+	 * iterations for K-means until converge
+	 * 
+	 */
 	public void iteration() {
 		boolean changed = true;
 		int count = 0;

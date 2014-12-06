@@ -13,26 +13,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
 public class SeqDNACluster {
-	
-	class PopularBase implements Comparator<PopularBase>{
-		char base;
-		int times;
-		public PopularBase(char base, int times) {
-			this.base = base;
-			this.times = times;
-		}
-		@Override
-		public int compare(PopularBase o1, PopularBase o2) {
-			return o1.times-o2.times;
-		}
-	}
-	
 	
 	private ArrayList<String> DNAStrands;
 	private ArrayList<String> seeds;
@@ -40,6 +25,9 @@ public class SeqDNACluster {
 	private ArrayList<HashSet<String>> clusters;
     private String output="SeqDNACluster.csv";
 
+    /**
+     * read data from file
+     */
 	public void readData(String filename) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -57,6 +45,9 @@ public class SeqDNACluster {
 		}
 	}
 
+	/**
+	 * initialize seeds randomly 
+	 */
 	public void initSeed() {
 		Random rand = new Random();
 		for (int i = 0; i < this.clusterNumber; i++) {
@@ -66,6 +57,14 @@ public class SeqDNACluster {
 		}
 	}
 
+	/**
+	 * calculate the edit distance between two DNA
+	 * by counting the minimum number of operations(Insertion, Deletion, Substitution) 
+	 * required to transform one string into the other. 
+	 * @param DNAStrand1
+	 * @param DNAStrand2
+	 * @return
+	 */ 
 	private int distance(String DNAStrand1, String DNAStrand2) {
 		int len = DNAStrand1.length();
         int record[][] = new int[len+1][len+1];
@@ -84,6 +83,10 @@ public class SeqDNACluster {
         return record[len][len];
 	}
 
+	/**
+	 * Constructor of SeqDNACluster 
+	 * @param k
+	 */
 	public SeqDNACluster(int k) {
 		this.DNAStrands = new ArrayList<String>();
 		this.clusterNumber = k;
@@ -109,6 +112,9 @@ public class SeqDNACluster {
 
 	}
 
+	/**
+	 * update seeds after one iteration 
+	 */
 	private void recalculateSeed() {
 		for (int i = 0; i < this.clusters.size(); i++) {
 			StringBuilder newSeed = new StringBuilder();
@@ -139,8 +145,11 @@ public class SeqDNACluster {
 		}
 	}
 
+	/**
+	 * iterations for K-means until converge
+	 */
 	public void iteration() {
-		boolean changed = true;
+		boolean changed = true; // sign bit for whether need a another iteration
 		int count = 0;
 
 		while (changed) {

@@ -71,6 +71,9 @@ public class MPIPointCluster {
 		this.seedY = new double[this.clusterNumber];
 	}
 
+	/**
+	 * read data from file
+	 */
 	private void readData(String filename) {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -95,6 +98,9 @@ public class MPIPointCluster {
 
 	}
 
+	/**
+	 * initialize seeds randomly 
+	 */
 	private void initSeed() {
 
 		Random rand = new Random();
@@ -144,6 +150,10 @@ public class MPIPointCluster {
 		}
 	}
 
+	/**
+	 * iterations for K-means until converge
+	 * @throws MPIException
+	 */
 	public void iteration() throws MPIException {
 		boolean[] changed = new boolean[1];
 		changed[0] = true;
@@ -152,9 +162,6 @@ public class MPIPointCluster {
 			count++;
 			MPI.COMM_WORLD.Bcast(seedX, 0, this.clusterNumber, MPI.DOUBLE, 0);
 			MPI.COMM_WORLD.Bcast(seedY, 0, this.clusterNumber, MPI.DOUBLE, 0);
-			// System.out.println("SeedX length " + seedX.length +" for rank "+
-			// this.rank);
-			// System.out.println("SeedX: " + Arrays.toString(this.seedX));
 
 			for (int i = 0; i < this.capacity[rank]; i++) {
 				double dis = Double.MAX_VALUE;
@@ -166,8 +173,6 @@ public class MPIPointCluster {
 						this.clusters[i] = j;
 					}
 				}
-				// System.out.println("The cluster it belongs to"+
-				// this.clusters[i]);
 			}
 			// calculate distance
 			if (this.rank != 0) { // wait for all the participants to send
@@ -183,8 +188,6 @@ public class MPIPointCluster {
 							MPI.INT, i, 0);
 					offset += this.capacity[i];
 				}
-				// System.out.println(Arrays.toString(newCluster));
-				// System.out.println(Arrays.toString(this.clusters));
 
 				// compare the two
 				int i = 0;
@@ -198,7 +201,6 @@ public class MPIPointCluster {
 						break;
 					}
 				}
-				// //System.out.println("now status: "+changed[0]);
 
 			}
 			if (rank == 0) {
@@ -213,9 +215,10 @@ public class MPIPointCluster {
 		System.out.println("It runs " + count + " iterations on rank " + rank);
 	}
 
+	/**
+	 * update seeds after one iteration
+	 */
 	private void recalculateSeed() {
-		// System.out.println("Data To Calculate Now:"+
-		// Arrays.toString(this.xPoint));
 
 		double[] seedX = new double[this.clusterNumber];
 		double[] seedY = new double[this.clusterNumber];
@@ -256,6 +259,14 @@ public class MPIPointCluster {
 		}
 	}
 
+	/**
+	 * calculate the distance between two points 
+	 * @param x
+	 * @param y
+	 * @param xCenter
+	 * @param yCenter
+	 * @return
+	 */
 	private double distance(double x, double y, double xCenter, double yCenter) {
 		return Math.sqrt((x - xCenter) * (x - xCenter) + (y - yCenter)
 				* (y - yCenter));
