@@ -9,14 +9,13 @@ all:
 	mpijavac */MPI*.java
 
 generate_point:
-	python ./Point/generaterawdata.py -c $(CLUSTER) -p $(POINT) -o $(OUT)
-	mv ./Point/$(OUT) ./
+	python ./Point/generaterawdata.py -c $(K) -p $(POINT) -o $(OUT)
 
 run_seq_point:
 	java Point/SeqPointCluster $(Input) $(K) $(Output)
 
 generate_DNA:
-	java DNA/GenerateDNAStrand $(Num) $(DNALength) $(Output)
+	java DNA/GenerateDNAStrand $(Num) $(Length) $(Output)
 
 run_seq_DNA:
 	java DNA/SeqDNACluster $(Input) $(K) $(Output)
