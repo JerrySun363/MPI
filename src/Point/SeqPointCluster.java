@@ -13,11 +13,11 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class SeqPointCluster {
-	protected ArrayList<Point> points;
-	protected ArrayList<Point> seeds;
-	protected int clusterNumber;
-	protected ArrayList<HashSet<Point>> clusters;
-    public String outputFile;
+	private ArrayList<Point> points;
+	private ArrayList<Point> seeds;
+	private int clusterNumber;
+	private ArrayList<HashSet<Point>> clusters;
+	private String outputFile = "SeqPointCluster.csv";
 
 	public void readData(String filename) {
 		try {
@@ -48,7 +48,7 @@ public class SeqPointCluster {
 		}
 	}
 
-	protected double distance(Point p1, Point p2) {
+	private double distance(Point p1, Point p2) {
 		return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y)
 				* (p1.y - p2.y));
 	}
@@ -69,7 +69,7 @@ public class SeqPointCluster {
 		SeqPointCluster spc = new SeqPointCluster(Integer.parseInt(args[1]));
 		spc.readData(args[0]);
 		spc.initSeed();
-        spc.outputFile = args[2];
+		spc.outputFile = args[2];
 		long start = System.currentTimeMillis();
 		spc.iteration();
 		long time = System.currentTimeMillis() - start;
@@ -144,7 +144,8 @@ public class SeqPointCluster {
 			for (int i = 0; i < this.clusters.size(); i++) {
 				HashSet<Point> points = clusters.get(i);
 				for (Point p : points) {
-					bw.write("Point: " + p.x + "," + p.y + " belongs to " + i + " cluster" + "\n");
+					bw.write("Point: " + p.x + "," + p.y + " belongs to " + i
+							+ " cluster" + "\n");
 				}
 			}
 			bw.close();

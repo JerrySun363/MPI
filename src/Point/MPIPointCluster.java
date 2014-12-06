@@ -1,4 +1,5 @@
 package Point;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,17 +30,19 @@ public class MPIPointCluster {
 	private double[] seedY;
 	private int clusterNumber;
 	private int number;
+	private String output = "MPIPointOutput.csv";
 
 	public static void main(String args[]) throws MPIException {
-		if (args.length != 3) {
+		if (args.length != 4) {
 			System.out
-					.println("Usage: MPIPointCluster <Input> <K> <PointNumber>");
+					.println("Usage: MPIPointCluster <Input> <K> <PointNumber> <Output>");
 			System.exit(-1);
 		}
 
 		MPI.Init(args);
 		MPIPointCluster cluster = new MPIPointCluster(
 				Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+		cluster.output = args[3];
 		if (cluster.rank == 0) {
 			cluster.readData(args[0]);
 			cluster.initSeed();
@@ -50,7 +53,8 @@ public class MPIPointCluster {
 		cluster.iteration();
 		// time ends here.
 		System.out.println("Rank " + cluster.rank + ": It uses "
-				+ (System.currentTimeMillis() - start) + " milliseconds to finish");
+				+ (System.currentTimeMillis() - start)
+				+ " milliseconds to finish");
 		MPI.Finalize();
 		cluster.printCluster();
 
@@ -111,7 +115,8 @@ public class MPIPointCluster {
 					+ (i <= xPoint.length % (this.procs - 1) ? 1 : 0);
 		}
 		try {
-			System.out.println("Host: " + InetAddress.getLocalHost().getHostName());
+			System.out.println("Host: "
+					+ InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -120,7 +125,7 @@ public class MPIPointCluster {
 		if (rank == 0) {// master
 			int offset = 0;
 			for (int i = 1; i < this.procs; i++) {
-				
+
 				MPI.COMM_WORLD.Send(xPoint, offset, this.capacity[i],
 						MPI.DOUBLE, i, i);
 				MPI.COMM_WORLD.Send(yPoint, offset, this.capacity[i],
@@ -235,10 +240,10 @@ public class MPIPointCluster {
 		if (this.rank == 0) {
 			try {
 				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-						new FileOutputStream(new File("mpioutput.csv"))));
+						new FileOutputStream(new File(this.output))));
 				for (int i = 0; i < xPoint.length; i++) {
-					bw.write("Point: " + xPoint[i] + "," + yPoint[i] + " belongs to " + clusters[i] + " cluster"
-							+ "\n");
+					bw.write("Point: " + xPoint[i] + "," + yPoint[i]
+							+ " belongs to " + clusters[i] + " cluster" + "\n");
 				}
 				bw.close();
 			} catch (FileNotFoundException e) {

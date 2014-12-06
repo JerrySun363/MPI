@@ -1,4 +1,5 @@
 package DNA;
+
 /**
  * 
  */
@@ -38,17 +39,20 @@ public class MPIDNACluster {
 	private char[][] DNAStrands;
 	private char[][] seeds;
 	private int clusterNumber;
+	private String output = "MPIClusterOutput.csv";
 
 	public static void main(String args[]) throws MPIException {
-		if (args.length != 4) {
+		if (args.length != 5) {
 			System.out
-					.println("Usage: MPIDNACluster <DataFileName> <ClusterNumber> <DNALength> <DNANumber>");
+					.println("Usage: MPIDNACluster <DataFileName> <ClusterNumber> <DNALength> <DNANumber> <Output>");
 			System.exit(-1);
 		}
 
 		MPI.Init(args);
-		MPIDNACluster cluster = new MPIDNACluster(Integer.parseInt(args[1]), Integer.parseInt(args[2]), 
-				Integer.parseInt(args[3]));
+		MPIDNACluster cluster = new MPIDNACluster(Integer.parseInt(args[1]),
+				Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+		cluster.output = args[4];
+
 		if (cluster.rank == 0) {
 			cluster.readData(args[0]);
 			cluster.initSeed();
@@ -59,7 +63,8 @@ public class MPIDNACluster {
 		cluster.iteration();
 		// time ends here.
 		System.out.println("Rank " + cluster.rank + ": It uses "
-				+ (System.currentTimeMillis() - start) + " milliseconds to finish");
+				+ (System.currentTimeMillis() - start)
+				+ " milliseconds to finish");
 		MPI.Finalize();
 		cluster.printCluster();
 	}
@@ -70,7 +75,7 @@ public class MPIDNACluster {
 		this.clusterNumber = k;
 		this.DNALength = len;
 		this.DNANumber = num;
-		
+
 		this.DNAStrands = new char[this.DNANumber][this.DNALength];
 		this.seeds = new char[this.clusterNumber][this.DNALength];
 	}
@@ -91,14 +96,14 @@ public class MPIDNACluster {
 			System.out.println("I/O Exception while reading the data");
 			System.exit(-1);
 		}
-		
+
 		for (int i = 0; i < this.DNAStrands.length; i++) {
 			this.DNAStrands[i] = dnaStrands.get(i).toCharArray();
 		}
 	}
 
 	private void initSeed() {
-		
+
 		Random rand = new Random();
 		for (int i = 0; i < this.clusterNumber; i++) {
 			int index = rand.nextInt(this.DNAStrands.length);
@@ -120,7 +125,7 @@ public class MPIDNACluster {
 			this.capacity[i] = DNAStrands.length / (this.procs - 1)
 					+ (i <= DNAStrands.length % (this.procs - 1) ? 1 : 0);
 		}
-		
+
 		try {
 			System.out.println(InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e) {
@@ -130,20 +135,22 @@ public class MPIDNACluster {
 		if (rank == 0) {// master
 			int offset = 0;
 			for (int i = 1; i < this.procs; i++) {
-				for(int j = 0; j < capacity[i]; j++)
-					MPI.COMM_WORLD.Send(DNAStrands[offset + j], 0, this.DNALength, MPI.CHAR, i, i);
-				
+				for (int j = 0; j < capacity[i]; j++)
+					MPI.COMM_WORLD.Send(DNAStrands[offset + j], 0,
+							this.DNALength, MPI.CHAR, i, i);
+
 				MPI.COMM_WORLD.Send(clusters, offset, this.capacity[i],
 						MPI.INT, i, i);
-				
+
 				offset += this.capacity[i];
 				// System.out.println("Data I am sending:" +
 				// Arrays.toString(xPoint));
 			}
 		} else {
-			for(int i = 0; i < capacity[this.rank]; i++)
-				MPI.COMM_WORLD.Recv(DNAStrands[i], 0, this.DNALength, MPI.CHAR, 0, rank);
-			
+			for (int i = 0; i < capacity[this.rank]; i++)
+				MPI.COMM_WORLD.Recv(DNAStrands[i], 0, this.DNALength, MPI.CHAR,
+						0, rank);
+
 			MPI.COMM_WORLD.Recv(clusters, 0, this.capacity[rank], MPI.INT, 0,
 					rank);
 			// System.out.println("I am rank " + rank + "data I got: "+
@@ -156,27 +163,27 @@ public class MPIDNACluster {
 		changed[0] = true;
 		int count = 0;
 		while (changed[0]) {
-			System.out.println("Iteration #"+count + " rank #"+this.rank);
+			System.out.println("Iteration #" + count + " rank #" + this.rank);
 			count++;
 			for (int i = 0; i < this.clusterNumber; i++) {
-				MPI.COMM_WORLD.Bcast(seeds[i], 0, this.DNALength, MPI.CHAR, 0);  //TODO
+				MPI.COMM_WORLD.Bcast(seeds[i], 0, this.DNALength, MPI.CHAR, 0); // TODO
 			}
-			
-//			System.out.println("SeedX: " + Arrays.toString(this.seeds));
 
-			// reassign the class 
+			// System.out.println("SeedX: " + Arrays.toString(this.seeds));
+
+			// reassign the class
 			for (int i = 0; i < this.capacity[rank]; i++) {
 				int dis = Integer.MAX_VALUE;
 				for (int j = 0; j < seeds.length; j++) {
-					
+
 					int mydis = distance(DNAStrands[i], seeds[j]);
 					if (mydis < dis) {
 						dis = mydis;
 						this.clusters[i] = j;
 					}
 				}
-//				System.out.println("The cluster it belongs to"+
-//				this.clusters[i]);
+				// System.out.println("The cluster it belongs to"+
+				// this.clusters[i]);
 			}
 			// calculate distance
 			if (this.rank != 0) { // wait for all the participants to send
@@ -192,8 +199,8 @@ public class MPIDNACluster {
 							MPI.INT, i, 0);
 					offset += this.capacity[i];
 				}
-//				System.out.println(Arrays.toString(newCluster));
-//				System.out.println(Arrays.toString(this.clusters));
+				// System.out.println(Arrays.toString(newCluster));
+				// System.out.println(Arrays.toString(this.clusters));
 
 				// check whether the cluster is fixed
 				int i = 0;
@@ -207,7 +214,7 @@ public class MPIDNACluster {
 						break;
 					}
 				}
-//				System.out.println("now status: "+changed[0]);
+				// System.out.println("now status: "+changed[0]);
 
 			}
 			if (rank == 0) {
@@ -221,30 +228,27 @@ public class MPIDNACluster {
 		}
 	}
 
-
-	
-	
 	private void recalculateSeed() {
-//		System.out.println("Data To Calculate Now:"+
-//		Arrays.toString(this.seeds));
+		// System.out.println("Data To Calculate Now:"+
+		// Arrays.toString(this.seeds));
 
 		ArrayList<ArrayList<String>> clusterStrings = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < this.clusterNumber; i++) {
 			clusterStrings.add(new ArrayList<String>());
 		}
-		
+
 		for (int i = 0; i < this.clusters.length; i++) {
 			clusterStrings.get(clusters[i]).add(new String(DNAStrands[i]));
 		}
-		
+
 		for (int i = 0; i < this.clusterNumber; i++) {
-            StringBuilder newSeed = new StringBuilder();
+			StringBuilder newSeed = new StringBuilder();
 			for (int j = 0; j < this.DNALength; j++) {
 				HashMap<Character, Integer> record = new HashMap<Character, Integer>();
 				for (String tempDNA : clusterStrings.get(i)) {
 					char temp = tempDNA.charAt(j);
 					if (record.containsKey(temp)) {
-						record.put(temp, record.get(temp)+1);
+						record.put(temp, record.get(temp) + 1);
 					} else {
 						record.put(temp, 1);
 					}
@@ -257,7 +261,7 @@ public class MPIDNACluster {
 						max = record.get(temp);
 					}
 				}
-				newSeed.append(choiceBase);	
+				newSeed.append(choiceBase);
 			}
 			seeds[i] = newSeed.toString().toCharArray();
 		}
@@ -267,10 +271,10 @@ public class MPIDNACluster {
 		if (this.rank == 0) {
 			try {
 				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-						new FileOutputStream(new File("mpiDNAoutput.csv"))));
+						new FileOutputStream(new File(this.output))));
 				for (int i = 0; i < DNAStrands.length; i++) {
-					bw.write(new String(DNAStrands[i]) + " belongs to " +  clusters[i] + " cluster"
-							+ "\n");
+					bw.write(new String(DNAStrands[i]) + " belongs to "
+							+ clusters[i] + " cluster" + "\n");
 				}
 				bw.close();
 			} catch (FileNotFoundException e) {
@@ -285,21 +289,23 @@ public class MPIDNACluster {
 
 	private int distance(char[] DNAStrand1, char[] DNAStrand2) {
 		int len = DNAStrand1.length;
-        int record[][] = new int[len+1][len+1];
-        //initial state
-        record[0][0] = 0;
-        for (int i = 1; i <= len; i++) // need to begin form index 0 which means word1 has no character
-            record[i][0] = i;
-        for (int i = 1; i <= len; i++)
-            record[0][i] = i;
-        for (int i = 1; i <= len; i++) {
-            for (int j = 1; j <= len; j++) {
-                int temp = Math.min(record[i-1][j] + 1, record[i][j-1] + 1);
-                record[i][j] = Math.min(record[i-1][j-1] + (DNAStrand1[i-1] == DNAStrand2[j-1] ? 0 : 1), temp);
-            }
-        }   
-        return record[len][len];
+		int record[][] = new int[len + 1][len + 1];
+		// initial state
+		record[0][0] = 0;
+		for (int i = 1; i <= len; i++)
+			// need to begin form index 0 which means word1 has no character
+			record[i][0] = i;
+		for (int i = 1; i <= len; i++)
+			record[0][i] = i;
+		for (int i = 1; i <= len; i++) {
+			for (int j = 1; j <= len; j++) {
+				int temp = Math.min(record[i - 1][j] + 1, record[i][j - 1] + 1);
+				record[i][j] = Math.min(record[i - 1][j - 1]
+						+ (DNAStrand1[i - 1] == DNAStrand2[j - 1] ? 0 : 1),
+						temp);
+			}
+		}
+		return record[len][len];
 	}
-
 
 }

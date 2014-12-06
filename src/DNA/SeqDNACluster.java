@@ -1,6 +1,3 @@
-/**
- * 
- */
 package DNA;
 
 /**
@@ -32,17 +29,16 @@ public class SeqDNACluster {
 		}
 		@Override
 		public int compare(PopularBase o1, PopularBase o2) {
-			// TODO Auto-generated method stub
 			return o1.times-o2.times;
 		}
 	}
 	
 	
-	protected ArrayList<String> DNAStrands;
-	protected ArrayList<String> seeds;
-	protected int clusterNumber;
-	protected ArrayList<HashSet<String>> clusters;
-    public String output;
+	private ArrayList<String> DNAStrands;
+	private ArrayList<String> seeds;
+	private int clusterNumber;
+	private ArrayList<HashSet<String>> clusters;
+    private String output="SeqDNACluster.csv";
 
 	public void readData(String filename) {
 		try {
@@ -70,7 +66,7 @@ public class SeqDNACluster {
 		}
 	}
 
-	protected int distance(String DNAStrand1, String DNAStrand2) {
+	private int distance(String DNAStrand1, String DNAStrand2) {
 		int len = DNAStrand1.length();
         int record[][] = new int[len+1][len+1];
         //initial state
