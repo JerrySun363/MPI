@@ -15,7 +15,7 @@ run_seq_point:
 	java Point/SeqPointCluster $(Input) $(K) $(Output)
 
 generate_DNA:
-	java DNA/GenerateDNAStrand $(Num) $(Length) $(Output)
+	java DNA/GenerateDNAStrand $(Number) $(Length) $(Output)
 
 run_seq_DNA:
 	java DNA/SeqDNACluster $(Input) $(K) $(Output)
